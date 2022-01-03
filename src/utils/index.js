@@ -1,3 +1,4 @@
+import { type } from "koa/lib/response";
 
 /**
  * 判断是否是对象
@@ -25,4 +26,12 @@ export function hasChanged(newValue, oldValue) {
  */
 export function isArray(target) {
     return Array.isArray(target);
+}
+
+/**
+ * 是否为函数
+ * @param {*} target 
+ */
+export function isFunction(target) {
+    return typeof target === 'function';
 }
