@@ -1,3 +1,5 @@
-console.log(666)
+import { reactive } from './reactivity';
 
-export default 'sss';
+export default {
+    reactive
+};
