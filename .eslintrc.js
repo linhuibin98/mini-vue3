@@ -1,0 +1,5 @@
+module.exports = {
+  extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+  plugins: ['prettier'],
+  includes: ['src/**'],
+}
