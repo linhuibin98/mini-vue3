@@ -9,17 +9,21 @@
 <body>
     <script type="module">
         import vue from '../dist/vue.js';
-        const { reactive } = vue;
-        console.log(reactive)
-        const obj = {
+        const { reactive, effect } = vue;
+
+        const obj = reactive({
             a: 1,
             b: 'hello'
-        };
-
-        const proxy = reactive(obj);
-        proxy.a;
-        proxy.a = 2;
-        proxy.b = "hello world";
+        });
+        // debugger
+        const cpu = effect(() => {
+            console.log('effect')
+            return obj.a + 1;
+        }, { lazy: true });
+        obj.a;
+        obj.a = 2;
+        obj.b = "hello world";
+        console.log(cpu())
     </script>
 </body>
 </html>

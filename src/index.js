@@ -1,5 +1,6 @@
-import { reactive } from './reactivity';
+import { reactive, effect } from './reactivity';
 
 export default {
-    reactive
+    reactive,
+    effect
 };
