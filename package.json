@@ -9,7 +9,8 @@
     "dev:server": "browser-sync start --server --startPath examples --files dist/**,examples/** --open local --no-notify",
     "build": "cross-env NODE_ENV=production && rollup --config rollup.config.js",
     "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "test": "jest"
   },
   "husky": {
     "hooks": {
@@ -43,13 +44,11 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
+    "jest": "^27.4.5",
     "lint-staged": "^12.1.5",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
     "rollup": "^2.62.0",
     "rollup-plugin-node-resolve": "^5.2.0"
-  },
-  "dependencies": {
-    "jest": "^27.4.5"
   }
 }
