@@ -1,5 +1,3 @@
-import { type } from "koa/lib/response";
-
 /**
  * 判断是否是对象
  * @param {any} target any

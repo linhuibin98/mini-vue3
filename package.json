@@ -35,7 +35,10 @@
   },
   "homepage": "https://github.com/linhuibin98/mini-vue3#readme",
   "devDependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
     "babel-eslint": "^10.1.0",
+    "babel-jest": "^27.4.5",
     "browser-sync": "^2.27.7",
     "chokidar": "^3.5.2",
     "cross-env": "^7.0.3",
