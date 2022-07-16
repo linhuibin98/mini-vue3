@@ -1,0 +1,5 @@
+{
+  "extends": [
+      "@linhuibin/eslint-config"
+  ]
+}
