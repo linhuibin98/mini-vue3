@@ -2,7 +2,7 @@ import { extend } from '../shared'
 
 let activeEffect: ReactiveEffect | null = null
 let shouldTrack = false
-class ReactiveEffect {
+export class ReactiveEffect {
   private fn
   public deps: Set<Set<ReactiveEffect>> = new Set()
   private active = true
