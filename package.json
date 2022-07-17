@@ -2,7 +2,7 @@
   "name": "mini-vue3",
   "version": "1.0.0",
   "description": "mini-vue3",
-  "main": "src/index.js",
+  "main": "dist/vue.js",
   "scripts": {
     "dev": "run-p dev:*",
     "dev:build-serve": "cross-env NODE_ENV=development && rollup --config rollup.config.ts --watch",

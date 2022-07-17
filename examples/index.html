@@ -5,24 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Vue</title>
+    <style>
+        .red {
+            color: red;
+        }
+        .blue {
+            color: blue;
+        }
+    </style>
 </head>
 <body>
-    <script type="module">
-        import { reactive, effect } from '../dist/vue.js';
+    <div id="app"></div>
 
-        const obj = reactive({
-            a: 1,
-            b: 'hello'
-        });
-        // debugger
-        const cpu = effect(() => {
-            console.log('effect')
-            return obj.a + 1;
-        }, { lazy: true });
-        obj.a;
-        obj.a = 2;
-        obj.b = "hello world";
-        console.log(cpu())
+    <script type="module">
+        import { createApp, h } from '../dist/vue.js'
+
+        const App = {
+          setup() {
+            return {
+              msg: 'hi vue3',
+            }
+          },
+          render() {
+            window.self = this
+            return h('div', { id: 'root' }, [
+              h('h1', { class: 'red' }, this.msg),
+              h('p', { class: 'blue' }, 'LaLa'),
+            ])
+          },
+}
+        createApp(App).mount(document.querySelector('#app'))
     </script>
 </body>
 </html>
