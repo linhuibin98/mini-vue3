@@ -29,8 +29,14 @@
           render() {
             window.self = this
             return h('div', { id: 'root' }, [
-              h('h1', { class: 'red' }, this.msg),
-              h('p', { class: 'blue' }, 'LaLa'),
+              h('h1', {
+                class: 'red',
+                onClick: () => console.log('click h1'),
+              }, this.msg),
+              h('p', {
+                class: 'blue',
+                onMouseEnter: () => console.log('p mouse enter'),
+              }, 'LaLa'),
             ])
           },
 }
