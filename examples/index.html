@@ -20,6 +20,23 @@
     <script type="module">
         import { createApp, h } from '../dist/vue.js'
 
+        const FooComponent = {
+          props: {
+            msg: {
+              type: String,
+              default: '',
+            },
+          },
+          setup() {
+            return {
+              count: 1,
+            }
+          },
+          render() {
+            return h('h1', { class: 'foo' }, this.msg)
+          },
+        }
+
         const App = {
           setup() {
             return {
@@ -29,6 +46,7 @@
           render() {
             window.self = this
             return h('div', { id: 'root' }, [
+              h(FooComponent, { msg: 'My Foo' }, []),
               h('h1', {
                 class: 'red',
                 onClick: () => console.log('click h1'),
