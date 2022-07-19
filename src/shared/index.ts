@@ -23,3 +23,9 @@ export function hasChanged(val, newValue) {
 export function hasOwn(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key)
 }
+// add-foo -> addFoo
+export const camelize = (str: string) => str.replace(/-(\w)/g, (_, c) => c ? c.toLocaleUpperCase() : '')
+// addFoo -> AddFoo
+export const capitalize = (str: string) => str.charAt(0).toLocaleUpperCase() + str.slice(1)
+// AddFoo -> onAddFoo
+export const toHandlerKey = (str: string) => str ? `on${capitalize(str)}` : ''

@@ -27,26 +27,39 @@
               default: '',
             },
           },
-          setup() {
+          setup(props, { emit }) {
+            const emitAdd = () => {
+              emit('add', 'addValue')
+              emit('add-foo', 'foo value')
+            }
             return {
               count: 1,
+              emitAdd,
             }
           },
           render() {
-            return h('h1', { class: 'foo' }, this.msg)
+            return h('h1', { class: 'foo', onClick: this.emitAdd }, this.msg)
           },
         }
 
         const App = {
           setup() {
+            const onAdd = (val) => {
+              console.log('App onAdd', val)
+            }
+            const onAddFoo = (val) => {
+              console.log('onAddFoo', val)
+            }
             return {
               msg: 'hi vue3',
-            }
+              onAdd,
+              onAddFoo,
+    }
           },
           render() {
             window.self = this
             return h('div', { id: 'root' }, [
-              h(FooComponent, { msg: 'My Foo' }, []),
+              h(FooComponent, { msg: 'My Foo', onAdd: this.onAdd, onAddFoo: this.onAddFoo }, []),
               h('h1', {
                 class: 'red',
                 onClick: () => console.log('click h1'),
