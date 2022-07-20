@@ -18,7 +18,7 @@
     <div id="app"></div>
 
     <script type="module">
-        import { createApp, h } from '../dist/vue.js'
+        import { createApp, h, renderSlots } from '../dist/vue.js'
 
         const FooComponent = {
           props: {
@@ -38,7 +38,7 @@
             }
           },
           render() {
-            return h('h1', { class: 'foo', onClick: this.emitAdd }, this.msg)
+            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer')])
           },
         }
 
@@ -59,8 +59,11 @@
           render() {
             window.self = this
             return h('div', { id: 'root' }, [
-              h(FooComponent, { msg: 'My Foo', onAdd: this.onAdd, onAddFoo: this.onAddFoo }, []),
-              h('h1', {
+              h(FooComponent, { msg: 'My Foo', onAdd: this.onAdd, onAddFoo: this.onAddFoo }, {
+                header: ({ msg }) => h('p', {}, `foo header${msg}`),
+                footer: () => h('p', {}, 'foo footer'),
+              }),
+              h('h2', {
                 class: 'red',
                 onClick: () => console.log('click h1'),
               }, this.msg),

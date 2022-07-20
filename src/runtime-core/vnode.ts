@@ -1,4 +1,4 @@
-import { isArray, isString } from '../shared'
+import { isArray, isObject, isString } from '../shared'
 import { ShapeFlags } from '../shared/ShapeFlags'
 
 export function createVNode(type, props = {}, children = null) {
@@ -16,6 +16,11 @@ export function createVNode(type, props = {}, children = null) {
 
   else if (isArray(children))
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN
+
+  if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    if (isObject(children))
+      vnode.shapeFlag |= ShapeFlags.SLOT_CHILDREN
+  }
 
   return vnode
 }

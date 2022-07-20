@@ -29,3 +29,7 @@ export const camelize = (str: string) => str.replace(/-(\w)/g, (_, c) => c ? c.t
 export const capitalize = (str: string) => str.charAt(0).toLocaleUpperCase() + str.slice(1)
 // AddFoo -> onAddFoo
 export const toHandlerKey = (str: string) => str ? `on${capitalize(str)}` : ''
+
+export function toArray(arr) {
+  return isArray(arr) ? arr : [arr]
+}

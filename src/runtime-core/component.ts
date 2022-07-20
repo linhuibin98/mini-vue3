@@ -3,12 +3,14 @@ import { isObject } from '../shared'
 import { emit } from './componentEmit'
 import { initProps } from './componentProps'
 import { publicInstanceProxyHandlers } from './componentPublicInstance'
+import { initSlots } from './componentSlots'
 
 export function createComponentInstance(vnode) {
   const componentInstance = {
     vnode,
     type: vnode.type,
     props: {},
+    slots: {},
     emit: () => {},
   }
 
@@ -19,8 +21,7 @@ export function createComponentInstance(vnode) {
 
 export function setupComponent(instance) {
   initProps(instance, instance.vnode.props)
-  // TODO
-  // initSlots
+  initSlots(instance, instance.vnode.children)
 
   setupStatefulComponent(instance)
 }
@@ -37,6 +38,7 @@ export function setupStatefulComponent(instance) {
     // function or object
     const setupResult = setup(shadowReadonly(instance.props), {
       emit: instance.emit,
+      slots: instance.slots,
     })
     handleSetupResult(instance, setupResult)
   }
