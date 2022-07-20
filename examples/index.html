@@ -18,7 +18,7 @@
     <div id="app"></div>
 
     <script type="module">
-        import { createApp, h, renderSlots } from '../dist/vue.js'
+        import { createApp, createTextVNode, h, renderSlots } from '../dist/vue.js'
 
         const FooComponent = {
           props: {
@@ -38,7 +38,7 @@
             }
           },
           render() {
-            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer')])
+            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer'), createTextVNode('我是文本')])
           },
         }
 
