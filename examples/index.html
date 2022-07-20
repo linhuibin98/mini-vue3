@@ -18,7 +18,7 @@
     <div id="app"></div>
 
     <script type="module">
-        import { createApp, createTextVNode, h, renderSlots } from '../dist/vue.js'
+        import { createApp, createTextVNode, getCurrentInstance, h, renderSlots } from '../dist/vue.js'
 
         const FooComponent = {
           props: {
@@ -32,6 +32,7 @@
               emit('add', 'addValue')
               emit('add-foo', 'foo value')
             }
+            console.log('getCurrentInstance', getCurrentInstance())
             return {
               count: 1,
               emitAdd,
