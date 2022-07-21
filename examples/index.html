@@ -18,7 +18,21 @@
     <div id="app"></div>
 
     <script type="module">
-        import { createApp, createTextVNode, getCurrentInstance, h, renderSlots } from '../dist/vue.js'
+        import { createApp, createTextVNode, getCurrentInstance, h, inject, provide, renderSlots } from '../dist/vue.js'
+
+        const BarComponent = {
+          setup() {
+            const name = inject('name')
+            const age = inject('age', 18)
+            return {
+              name,
+              age,
+            }
+          },
+          render() {
+            return h('div', {}, [createTextVNode(`Bar,${this.name}, age is ${this.age}`)])
+          },
+        }
 
         const FooComponent = {
           props: {
@@ -33,13 +47,15 @@
               emit('add-foo', 'foo value')
             }
             console.log('getCurrentInstance', getCurrentInstance())
+            const name = inject('name')
             return {
               count: 1,
               emitAdd,
-            }
+              name,
+    }
           },
           render() {
-            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer'), createTextVNode('我是文本')])
+            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer'), createTextVNode('我是文本'), h('p', {}, [createTextVNode(`provide inject: ${this.name}`)]), h(BarComponent, {}, [])])
           },
         }
 
@@ -51,6 +67,7 @@
             const onAddFoo = (val) => {
               console.log('onAddFoo', val)
             }
+            provide('name', 'hahaha')
             return {
               msg: 'hi vue3',
               onAdd,

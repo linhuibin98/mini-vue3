@@ -23,6 +23,11 @@ export function hasChanged(val, newValue) {
 export function hasOwn(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key)
 }
+
+export function hasKey(obj, key) {
+  return key in obj
+}
+
 // add-foo -> addFoo
 export const camelize = (str: string) => str.replace(/-(\w)/g, (_, c) => c ? c.toLocaleUpperCase() : '')
 // addFoo -> AddFoo
