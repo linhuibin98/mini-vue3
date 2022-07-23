@@ -4,17 +4,18 @@ function createElement(type) {
   return document.createElement(type)
 }
 
-function patchProps(el, props) {
+function patchProp(el, key, preValue, nextValue) {
   const isOn = key => /^on[A-z]/.test(key)
-  for (const propName in props) {
-    const val = props[propName]
-    if (isOn(propName)) {
-      const eventType = propName.slice(2).toLocaleLowerCase()
-      el.addEventListener(eventType, val)
-    }
-    else {
-      el.setAttribute(propName, val)
-    }
+
+  if (isOn(key)) {
+    const eventType = key.slice(2).toLocaleLowerCase()
+    el.addEventListener(eventType, nextValue)
+  }
+  else {
+    if (nextValue === undefined || nextValue === null)
+      el.removeAttribute(key)
+
+    else el.setAttribute(key, nextValue)
   }
 }
 
@@ -28,7 +29,7 @@ function createTextNode(text) {
 
 const renderer = createRenderer({
   createElement,
-  patchProps,
+  patchProp,
   insert,
   createTextNode,
 })

@@ -1,4 +1,4 @@
-import { shadowReadonly } from '../reactivity'
+import { proxyRefs, shadowReadonly } from '../reactivity'
 import { isObject } from '../shared'
 import { emit } from './componentEmit'
 import { initProps } from './componentProps'
@@ -16,6 +16,7 @@ export function createComponentInstance(vnode, parent) {
     emit: () => {},
     provides: parent ? parent.provides : {},
     parent,
+    isMounted: false,
   }
 
   componentInstance.emit = emit.bind(null, componentInstance) as any
@@ -55,7 +56,7 @@ function handleSetupResult(instance, setupResult) {
 
   // object
   if (isObject(setupResult))
-    instance.setupState = setupResult
+    instance.setupState = proxyRefs(setupResult)
 
   finishComponentSetup(instance)
 }
