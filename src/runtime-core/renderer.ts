@@ -10,6 +10,8 @@ export function createRenderer(options) {
     patchProp: hostPatchProp,
     insert: hostInsert,
     createTextNode: hostCreateTextNode,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
   } = options
 
   function render(vnode, container) {
@@ -83,12 +85,37 @@ export function createRenderer(options) {
     const newProps = n2.props
 
     const el = n2.el = n1.el
-
+    // 更新 children
+    patchChildren(n1, n2, el)
     // 更新 props
-    patchProps(el, oldProps, newProps)
+    patchProps(oldProps, newProps, el)
   }
 
-  function patchProps(el, oldProps, newProps) {
+  function patchChildren(n1, n2, container) {
+    const preShapeFlag = n1.shapeFlag
+    const shapeFlag = n2.shapeFlag
+
+    const c1 = n1.children
+    const c2 = n2.children
+
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      // Arr -> text
+      // text -> text
+      if (preShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 1. 清空老的 children
+        unmountChildren(c1)
+      }
+      // 2. 设置 text
+      hostSetElementText(container, c2.children)
+    }
+  }
+
+  function unmountChildren(children) {
+    for (const child of children)
+      hostRemove(child.el)
+  }
+
+  function patchProps(oldProps, newProps, el) {
     // 先遍历新 props 赋值
     for (const key in newProps) {
       if (Object.prototype.hasOwnProperty.call(newProps, key)) {
@@ -111,7 +138,7 @@ export function createRenderer(options) {
   function mountChildren(vnode, container, parent) {
     const { children, shapeFlag } = vnode
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      container.textContent = children
+      patch(null, children, container, parent)
     }
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       children.forEach((child) => {
@@ -138,6 +165,7 @@ export function createRenderer(options) {
         const { proxy } = instance
         // component -> children vnode
         const subTree = instance.render.call(proxy)
+        instance.subTree = subTree
         // children vnode -> mount
         patch(null, subTree, container, instance)
         // 因为 组件 没有 el，从组件第一个元素节点获取 el
@@ -148,8 +176,8 @@ export function createRenderer(options) {
       else { // 更新 update
         const { proxy } = instance
         const subTree = instance.render.call(proxy)
-        const preSubTree = instance.vnode
-        instance.vnode = subTree
+        const preSubTree = instance.subTree
+        instance.subTree = subTree
         patch(preSubTree, subTree, container, instance)
         vnode.el = subTree.el
       }

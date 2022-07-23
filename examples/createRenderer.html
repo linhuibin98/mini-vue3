@@ -32,13 +32,8 @@
               return rect
             }
           },
-          patchProps: (el, props) => {
-            for (const key in props) {
-              if (Object.hasOwnProperty.call(props, key)) {
-                const val = props[key]
-                el[key] = val
-              }
-            }
+          patchProp: (el, key, preValue, nextValue) => {
+            el[key] = nextValue
           },
           insert: (el, parent) => {
             parent.addChild(el)

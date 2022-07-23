@@ -20,6 +20,13 @@
     <script type="module">
         import { createApp, createTextVNode, h, ref } from '../dist/vue.js'
 
+        const array = [
+          h('div', {}, [createTextVNode('A')]),
+          h('div', {}, [createTextVNode('B')]),
+        ]
+
+        const text = createTextVNode('Text')
+
         const App = {
           setup() {
             const count = ref(0)
@@ -37,12 +44,20 @@
             const removeRootProp = () => {
               rootProps.value = {}
             }
+
+            const comp = ref(array)
+
+            const toText = () => {
+              comp.value = text
+            }
             return {
               count,
               onAdd,
               rootProps,
               changeRootProp,
               removeRootProp,
+              comp,
+              toText,
             }
           },
           render() {
@@ -53,6 +68,13 @@
                 h('button', { onClick: () => this.changeRootProp('foo', 'f') }, [createTextVNode('changeProps - 值改变')]),
                 h('button', { onClick: () => this.changeRootProp('bar', undefined) }, [createTextVNode('changeProps - 值变成 undefined - 删除')]),
                 h('button', { onClick: () => this.removeRootProp() }, [createTextVNode('changeProps - key 在新的里面没有 - 删除')]),
+              ]),
+              h('section', {}, [
+                h('h2', {}, [createTextVNode('更新 children')]),
+                h('div', {}, this.comp),
+                h('div', {}, [
+                  h('button', { onClick: this.toText }, [createTextVNode('toText')]),
+                ]),
               ]),
             ])
           },

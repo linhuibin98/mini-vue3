@@ -78,17 +78,17 @@
             window.self = this
             return h('div', { id: 'root' }, [
               h(FooComponent, { msg: 'My Foo', onAdd: this.onAdd, onAddFoo: this.onAddFoo }, {
-                header: ({ msg }) => h('p', {}, `foo header${msg}`),
-                footer: () => h('p', {}, 'foo footer'),
+                header: ({ msg }) => h('p', {}, createTextVNode(`foo header${msg}`)),
+                footer: () => h('p', {}, createTextVNode('foo footer')),
               }),
               h('h2', {
                 class: 'red',
                 onClick: () => console.log('click h1'),
-              }, this.msg),
+              }, createTextVNode(this.msg)),
               h('p', {
                 class: 'blue',
                 onMouseEnter: () => console.log('p mouse enter'),
-              }, 'LaLa'),
+              }, createTextVNode('LaLa')),
             ])
           },
 }

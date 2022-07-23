@@ -27,11 +27,23 @@ function createTextNode(text) {
   return document.createTextNode(text)
 }
 
+function remove(el) {
+  const parent = el.parentNode
+  if (parent)
+    parent.removeChild(el)
+}
+
+function setElementText(el, text) {
+  el.textContent = text
+}
+
 const renderer = createRenderer({
   createElement,
   patchProp,
   insert,
   createTextNode,
+  remove,
+  setElementText,
 })
 
 export function createApp(rootComponent) {

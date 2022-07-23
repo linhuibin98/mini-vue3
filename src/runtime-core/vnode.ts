@@ -14,7 +14,7 @@ export function createVNode(type, props = {}, children = null) {
   }
 
   // children shapeFlag
-  if (isString(children))
+  if (isTextVNode(children))
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
 
   else if (isArray(children))
@@ -28,12 +28,12 @@ export function createVNode(type, props = {}, children = null) {
   return vnode
 }
 
-export function h(type, props?, children?) {
-  return createVNode(type, props, children)
-}
-
 export function createTextVNode(text) {
   return createVNode(Text, {}, text)
+}
+
+export function isTextVNode(vnode) {
+  return isObject(vnode) && vnode.type === Text
 }
 
 export function getShapeFlag(type) {

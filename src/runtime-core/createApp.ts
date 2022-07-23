@@ -10,3 +10,7 @@ export function createAppAPI(render) {
     }
   }
 }
+
+export function h(type, props?, children?) {
+  return createVNode(type, props, children)
+}
