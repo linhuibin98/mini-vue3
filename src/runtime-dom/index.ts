@@ -19,8 +19,8 @@ function patchProp(el, key, preValue, nextValue) {
   }
 }
 
-function insert(el, parent) {
-  return parent.append(el)
+function insert(el, parent, anchor) {
+  return parent.insertBefore(el, anchor)
 }
 
 function createTextNode(text) {

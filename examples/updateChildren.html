@@ -20,37 +20,73 @@
     <script type="module">
         import { createApp, createTextVNode, h, ref } from '../dist/vue.js'
 
-        const array = [
-          h('div', {}, [createTextVNode('A')]),
+        const array1 = [
+          h('div', { id: 'arr1' }, [createTextVNode('A')]),
           h('div', {}, [createTextVNode('B')]),
         ]
 
-        const text = 'Text'
+        const array2 = [
+          h('div', { id: 'arr2' }, [createTextVNode('C')]),
+          h('div', {}, [createTextVNode('D')]),
+        ]
 
+        const array3 = [
+          h('div', { id: 'arr2' }, [createTextVNode('A')]),
+          h('div', {}, [createTextVNode('B')]),
+          h('div', {}, [createTextVNode('C')]),
+        ]
+
+        const text1 = 'Text1'
+        const text2 = 'Text2'
+
+        // arr -> text
+        // text -> arr
         const arrayToText = {
           setup() {
-            const isArray = ref(true)
-            window.toggleIsArray = () => {
-              isArray.value = !isArray.value
+            const type = ref('arr1')
+            window.setType = (t) => {
+              type.value = t
+            }
+
+            function renderComp(type) {
+              switch (type) {
+                case 'arr1':
+                  return array1
+                case 'arr2':
+                  return array2
+                case 'arr3':
+                  return array3
+                case 'text1':
+                  return text1
+                case 'text2':
+                  return text2
+                default:
+                  return array1
+              }
             }
             return {
-              isArray,
-            }
+              type,
+              renderComp,
+    }
           },
           render() {
-            return h('div', {}, this.isArray ? array : text)
+            return h('div', {}, this.renderComp(this.type))
           },
-}
+        }
 
         const App = {
           setup() {
             return { }
           },
           render() {
-            return h('div', { id: 'root' }, [h(arrayToText)])
+            return h('div', { id: 'root' }, [
+              h(arrayToText),
+            ])
           },
         }
+        
         createApp(App).mount(document.querySelector('#app'))
+
     </script>
 </body>
 </html>

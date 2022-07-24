@@ -8,6 +8,7 @@ export function createVNode(type, props?, children?) {
   const vnode = {
     __v_isVNode: true,
     type,
+    key: props?.key,
     props: props || {},
     children,
     el: null,
@@ -35,6 +36,10 @@ export function createTextVNode(text) {
 
 export function isVNode(value) {
   return value ? value.__v_isVNode === true : false
+}
+
+export function isSomeVNodeType(n1, n2) {
+  return n1.type === n2.type && n1.key === n2.key
 }
 
 export function getShapeFlag(type) {
