@@ -106,7 +106,7 @@ export function createRenderer(options) {
         unmountChildren(c1)
       }
       // 2. 设置 text
-      hostSetElementText(container, c2.children)
+      hostSetElementText(container, c2)
     }
   }
 
@@ -138,7 +138,7 @@ export function createRenderer(options) {
   function mountChildren(vnode, container, parent) {
     const { children, shapeFlag } = vnode
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      patch(null, children, container, parent)
+      hostSetElementText(container, children)
     }
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       children.forEach((child) => {

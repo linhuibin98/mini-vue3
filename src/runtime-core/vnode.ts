@@ -4,17 +4,18 @@ import { ShapeFlags } from '../shared/ShapeFlags'
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')
 
-export function createVNode(type, props = {}, children = null) {
+export function createVNode(type, props?, children?) {
   const vnode = {
+    __v_isVNode: true,
     type,
-    props,
+    props: props || {},
     children,
     el: null,
     shapeFlag: getShapeFlag(type),
   }
 
   // children shapeFlag
-  if (isTextVNode(children))
+  if (isString(children))
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
 
   else if (isArray(children))
@@ -32,8 +33,8 @@ export function createTextVNode(text) {
   return createVNode(Text, {}, text)
 }
 
-export function isTextVNode(vnode) {
-  return isObject(vnode) && vnode.type === Text
+export function isVNode(value) {
+  return value ? value.__v_isVNode === true : false
 }
 
 export function getShapeFlag(type) {

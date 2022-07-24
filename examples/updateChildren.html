@@ -25,7 +25,7 @@
           h('div', {}, [createTextVNode('B')]),
         ]
 
-        const text = createTextVNode('Text')
+        const text = 'Text'
 
         const arrayToText = {
           setup() {
@@ -35,7 +35,7 @@
             }
             return {
               isArray,
-    }
+            }
           },
           render() {
             return h('div', {}, this.isArray ? array : text)
