@@ -2,7 +2,7 @@ import { toArray } from '../shared'
 
 export function initSlots(instance, children) {
   // children -> object
-  normalizeObjectSlots(children, instance.slots, instance.props)
+  normalizeObjectSlots(children, instance.slots)
 }
 
 function normalizeObjectSlots(children, slots) {

@@ -19,6 +19,7 @@
 
     <script type="module">
         import { createApp, createTextVNode, h, ref } from '../dist/vue.js'
+        // import { createApp, createTextVNode, h, ref } from '../dist/vue.esm-bundler.js'
 
         const array1 = [
           h('div', { id: 'arr1' }, [createTextVNode('A')]),
@@ -31,9 +32,29 @@
         ]
 
         const array3 = [
-          h('div', { id: 'arr2' }, [createTextVNode('A')]),
+          h('div', { id: 'arr3' }, [createTextVNode('A')]),
           h('div', {}, [createTextVNode('B')]),
           h('div', {}, [createTextVNode('C')]),
+        ]
+
+        const array4 = [
+          h('div', { key: 'A' }, [createTextVNode('A')]),
+          h('div', { key: 'B' }, [createTextVNode('B')]),
+          h('div', { key: 'C' }, [createTextVNode('C')]),
+          h('div', { key: 'D' }, [createTextVNode('D')]),
+          h('div', { key: 'E' }, [createTextVNode('E')]),
+          h('div', { key: 'F' }, [createTextVNode('F')]),
+          h('div', { key: 'G' }, [createTextVNode('G')]),
+        ]
+
+        const array5 = [
+          h('div', { key: 'A' }, [createTextVNode('A')]),
+          h('div', { key: 'B' }, [createTextVNode('B')]),
+          h('div', { key: 'E' }, [createTextVNode('E')]),
+          h('div', { key: 'C' }, [createTextVNode('C')]),
+          h('div', { key: 'D' }, [createTextVNode('D')]),
+          h('div', { key: 'F' }, [createTextVNode('F')]),
+          h('div', { key: 'G' }, [createTextVNode('G')]),
         ]
 
         const text1 = 'Text1'
@@ -43,7 +64,7 @@
         // text -> arr
         const arrayToText = {
           setup() {
-            const type = ref('arr1')
+            const type = ref('arr4')
             window.setType = (t) => {
               type.value = t
             }
@@ -56,6 +77,10 @@
                   return array2
                 case 'arr3':
                   return array3
+                case 'arr4':
+                  return array4
+                case 'arr5':
+                  return array5
                 case 'text1':
                   return text1
                 case 'text2':

@@ -2,7 +2,7 @@ import { effect } from '../reactivity'
 import { ShapeFlags } from '../shared/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
-import { Fragment, Text, isSomeVNodeType } from './vnode'
+import { Fragment, Text, isSomeVNodeType, normalizeVNode } from './vnode'
 
 export function createRenderer(options) {
   const {
@@ -30,7 +30,7 @@ export function createRenderer(options) {
 
     switch (type) {
       case Fragment:
-        processFragment(n1, n2, container, parentComponent, anchor)
+        processFragment(n1, n2, container)
         break
       case Text:
         processText(n1, n2, container, anchor)
@@ -64,23 +64,23 @@ export function createRenderer(options) {
     }
   }
 
-  function processFragment(n1, n2, container, parent, anchor) {
+  function processFragment(n1, n2, container) {
     if (!n1)
-      mountChildren(n2, container, parent, anchor)
+      mountChildren(n2.children, container)
   }
 
   function processElement(n1, n2, container, parentComponent, anchor) {
     if (!n1)
-      mountElement(n2, container, parentComponent, anchor)
+      mountElement(n2, container, anchor)
     else
       patchElement(n1, n2, parentComponent, anchor)
   }
 
-  function mountElement(vnode, container, parent, anchor) {
+  function mountElement(vnode, container, anchor) {
     const { type, props } = vnode
     const el = vnode.el = hostCreateElement(type)
     // children
-    mountChildren(vnode, el, parent, anchor)
+    mountChildren(vnode.children, el)
 
     // props
     for (const propName in props)
@@ -125,7 +125,7 @@ export function createRenderer(options) {
       // case: arr -> arr
       if (preShapeFlag & ShapeFlags.TEXT_CHILDREN) {
         hostSetElementText(container, '')
-        mountChildren(n2, container, parentComponent, anchor)
+        mountChildren(n2.children, container)
       }
       else {
         // arr -> arr
@@ -138,7 +138,7 @@ export function createRenderer(options) {
     let i = 0
     let e1 = c1.length - 1
     let e2 = c2.length - 1
-
+    // debugger
     /**
      * case 1: 左侧对比
      *  old: [a, b, c]
@@ -186,7 +186,6 @@ export function createRenderer(options) {
      *  new: [c, a, b]
      *  此时：i: 0; e1: -1; e2: 0
      */
-    const l1 = c1.length
     const l2 = c2.length
     if (i > e1) {
       if (i <= e2) {
@@ -218,6 +217,98 @@ export function createRenderer(options) {
         }
       }
     }
+    else {
+      /**
+     * case 7: 中间乱序 对比
+     *  old: [a, b, c, d, f, g]
+     *  new: [a, b, e, c, f, g]
+     *  此时：i: 2; e1: 3; e2: 3
+     *
+     * case 8: 中间乱序 - 最长递增子序列，减少 insert 操作
+     *  old: [a, b, c, d, e, f, g]
+     *  new: [a, b, e, c, d, f, g]
+     *  此时：i: 2; e1: 4; e4: 4
+     *  s1: 2; s2: 2;
+     *  newIndexToOldIndexMap 值： [5 , 3 , 4]
+     *  increasingNewIndexSequence 最长递增子序列处理后返回：[1, 2] 表示的是索引
+     */
+      const s1 = i
+      const s2 = i
+
+      const toBePatched = e2 - s2 + 1
+      let parched = 0
+      const keyToNewIndexMap = new Map()
+      const newIndexToOldIndexMap = new Array(toBePatched).fill(0)
+      let moved = false
+      let maxNewIndexSoFar = 0
+
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i]
+        keyToNewIndexMap.set(nextChild.key, i)
+      }
+
+      for (let i = s1; i <= e1; i++) {
+        const preChild = c1[i]
+
+        if (parched >= toBePatched) {
+          hostRemove(preChild.el)
+          continue
+        }
+
+        let newIndex
+        // null / undefined
+        if (preChild.key != null) {
+          // 新旧 存在相同 key 的元素
+          newIndex = keyToNewIndexMap.get(preChild.key)
+        }
+        else {
+          for (let j = s2; j <= e2; j++) {
+            if (isSomeVNodeType(preChild, c2[j])) {
+              newIndex = j
+              break
+            }
+          }
+        }
+        // 如果还是没有找到相同的元素 newIndex
+        if (newIndex === undefined) {
+          // 删除
+          hostRemove(preChild.el)
+        }
+        else {
+          if (newIndex >= maxNewIndexSoFar)
+            maxNewIndexSoFar = newIndex
+          else
+            moved = true
+
+          newIndexToOldIndexMap[newIndex - s2] = i + 1
+          // 更新 patch
+          patch(preChild, c2[newIndex], container, parentComponent, null)
+          parched++
+        }
+      }
+
+      const increasingNewIndexSequence = moved ? getSequence(newIndexToOldIndexMap) : []
+
+      let j = increasingNewIndexSequence.length - 1
+
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        const nextIndex = i + s2
+        const nextChild = c2[nextIndex]
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : parentAnchor
+
+        if (newIndexToOldIndexMap[i] === 0) {
+          // 新增
+          patch(null, nextChild, container, parentComponent, anchor)
+        }
+        else if (moved) {
+          if (j < 0 || i !== increasingNewIndexSequence[j])
+            // 移动位置 / 插入
+            hostInsert(nextChild.el, container, anchor)
+          else
+            j--
+        }
+      }
+    }
   }
 
   function unmountChildren(children) {
@@ -245,16 +336,10 @@ export function createRenderer(options) {
     }
   }
 
-  function mountChildren(vnode, container, parent, anchor) {
-    const { children, shapeFlag } = vnode
-    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      hostSetElementText(container, children)
-    }
-    else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      children.forEach((child) => {
-        patch(null, child, container, parent, anchor)
-      })
-    }
+  function mountChildren(children, container) {
+    children.forEach((child) => {
+      patch(null, normalizeVNode(child), container, null, null)
+    })
   }
 
   function processComponent(n1, n2, container, parent, anchor) {
@@ -297,5 +382,46 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render),
   }
+}
+
+function getSequence(arr: number[]): number[] {
+  const p = arr.slice()
+  const result = [0]
+  let i, j, u, v, c
+  const len = arr.length
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i]
+    if (arrI !== 0) {
+      j = result[result.length - 1]
+      if (arr[j] < arrI) {
+        p[i] = j
+        result.push(i)
+        continue
+      }
+      u = 0
+      v = result.length - 1
+      while (u < v) {
+        c = (u + v) >> 1
+        if (arr[result[c]] < arrI)
+          u = c + 1
+
+        else
+          v = c
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0)
+          p[i] = result[u - 1]
+
+        result[u] = i
+      }
+    }
+  }
+  u = result.length
+  v = result[u - 1]
+  while (u-- > 0) {
+    result[u] = v
+    v = p[v]
+  }
+  return result
 }
 
