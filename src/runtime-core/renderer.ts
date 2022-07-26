@@ -1,6 +1,7 @@
 import { effect } from '../reactivity'
 import { ShapeFlags } from '../shared/ShapeFlags'
 import { createComponentInstance, setupComponent } from './component'
+import { showUpdateComponent } from './componentUpdateUtils'
 import { createAppAPI } from './createApp'
 import { Fragment, Text, isSomeVNodeType, normalizeVNode } from './vnode'
 
@@ -30,7 +31,7 @@ export function createRenderer(options) {
 
     switch (type) {
       case Fragment:
-        processFragment(n1, n2, container)
+        processFragment(n1, n2, container, anchor, parentComponent)
         break
       case Text:
         processText(n1, n2, container, anchor)
@@ -42,7 +43,7 @@ export function createRenderer(options) {
         }
         else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
           // 处理组件
-          processComponent(n1, n2, container, parentComponent, anchor)
+          processComponent(n1, n2, container, anchor, parentComponent)
         }
     }
   }
@@ -55,18 +56,21 @@ export function createRenderer(options) {
     }
     else {
       // update text
+      // 复用 textNode
+      const textNode = n2.el = n1.el
       if (n1.children !== n2.children) {
-        // 复用 textNode
-        const textNode = n2.el = n1.el
         // 更新 textNode 值
         hostSetElementText(textNode, children)
       }
     }
   }
 
-  function processFragment(n1, n2, container) {
+  function processFragment(n1, n2, container, anchor, parentComponent) {
     if (!n1)
       mountChildren(n2.children, container)
+    else
+      // 更新 children
+      patchChildren(n1, n2, container, parentComponent, anchor)
   }
 
   function processElement(n1, n2, container, parentComponent, anchor) {
@@ -342,20 +346,34 @@ export function createRenderer(options) {
     })
   }
 
-  function processComponent(n1, n2, container, parent, anchor) {
+  function processComponent(n1, n2, container, anchor, parentComponent) {
     if (!n1)
-      mountComponent(n2, container, parent, anchor)
+      mountComponent(n2, container, parentComponent, anchor)
+    else
+      updateComponent(n1, n2)
+  }
+
+  function updateComponent(n1, n2) {
+    const instance = n2.component = n1.component
+    if (showUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    }
+    else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
   }
 
   function mountComponent(vnode, container, parent, anchor) {
-    const instance = createComponentInstance(vnode, parent)
+    const instance = vnode.component = createComponentInstance(vnode, parent)
     setupComponent(instance)
     setupRenderEffect(instance, vnode, container, anchor)
   }
 
   function setupRenderEffect(instance, vnode, container, anchor) {
     // 组件级别依赖收集，触发更新
-    effect(() => {
+    instance.update = effect(() => {
       if (!instance.isMounted) { // 第一次 mounted
         const { proxy } = instance
         // component -> children vnode
@@ -369,12 +387,15 @@ export function createRenderer(options) {
         instance.isMounted = true
       }
       else { // 更新 update
-        const { proxy } = instance
+        const { proxy, next, vnode: preVNode } = instance
+        if (next) {
+          next.el = preVNode.el
+          updateComponentPreRender(instance, next)
+        }
         const subTree = instance.render.call(proxy)
         const preSubTree = instance.subTree
         instance.subTree = subTree
-        patch(preSubTree, subTree, container, instance, anchor)
-        vnode.el = subTree.el
+        patch(preSubTree, subTree, preSubTree.el, instance, anchor)
       }
     })
   }
@@ -382,6 +403,12 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render),
   }
+}
+
+function updateComponentPreRender(instance, nextVNode) {
+  instance.vnode = nextVNode
+  instance.next = null
+  instance.props = nextVNode.props
 }
 
 function getSequence(arr: number[]): number[] {

@@ -32,7 +32,7 @@ export function ref(value) {
 }
 
 export function isRef(maybeRef) {
-  return !!maybeRef.__v_isRef
+  return Boolean(maybeRef && maybeRef.__v_isRef)
 }
 
 export function unref(maybeRef) {

@@ -6,15 +6,15 @@ const publicPropertiesMap = {
 }
 
 export const publicInstanceProxyHandlers = {
-  get({ _: instance }, key, receiver) {
+  get({ _: instance }, key) {
     // setupState
     const { setupState, props } = instance
 
     if (hasOwn(setupState, key))
-      return Reflect.get(setupState, key, receiver)
+      return setupState[key]
 
     else if (hasOwn(props, key))
-      return Reflect.get(props, key, receiver)
+      return props[key]
 
     // key -> $el
     else if (hasOwn(publicPropertiesMap, key))

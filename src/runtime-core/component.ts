@@ -10,6 +10,7 @@ let currentInstance: any = null // 当前组件实例
 export function createComponentInstance(vnode, parent) {
   const componentInstance = {
     vnode,
+    next: null, // 下次要更新的 vnode
     subTree: {},
     type: vnode.type,
     props: {},
