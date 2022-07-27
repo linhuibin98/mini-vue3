@@ -38,13 +38,18 @@
             const addCount = () => {
               count.value += 1
             }
-            return { count, addCount }
+            const add100 = () => {
+              for (let i = 1; i < 100; i++)
+                count.value += i
+            }
+            return { count, addCount, add100 }
           },
           render() {
             return h('div', { id: 'root' },
               [
                 h(Foo, { count: this.count }),
                 h('button', { onClick: this.addCount }, [createTextVNode('+1')]),
+                h('button', { onClick: this.add100 }, [createTextVNode('+100')]),
               ],
             )
           },
