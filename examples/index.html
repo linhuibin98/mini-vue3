@@ -5,25 +5,94 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Vue</title>
+    <style>
+        .red {
+            color: red;
+        }
+        .blue {
+            color: blue;
+        }
+    </style>
 </head>
 <body>
-    <script type="module">
-        import vue from '../dist/vue.js';
-        const { reactive, effect } = vue;
+    <div id="app"></div>
 
-        const obj = reactive({
-            a: 1,
-            b: 'hello'
-        });
-        // debugger
-        const cpu = effect(() => {
-            console.log('effect')
-            return obj.a + 1;
-        }, { lazy: true });
-        obj.a;
-        obj.a = 2;
-        obj.b = "hello world";
-        console.log(cpu())
+    <script type="module">
+        import { createApp, createTextVNode, getCurrentInstance, h, inject, provide, renderSlots } from '../dist/vue.js'
+
+        const BarComponent = {
+          setup() {
+            const name = inject('name')
+            const age = inject('age', 18)
+            return {
+              name,
+              age,
+            }
+          },
+          render() {
+            return h('div', {}, [createTextVNode(`Bar,${this.name}, age is ${this.age}`)])
+          },
+        }
+
+        const FooComponent = {
+          props: {
+            msg: {
+              type: String,
+              default: '',
+            },
+          },
+          setup(props, { emit }) {
+            const emitAdd = () => {
+              emit('add', 'addValue')
+              emit('add-foo', 'foo value')
+            }
+            console.log('getCurrentInstance', getCurrentInstance())
+            const name = inject('name')
+            return {
+              count: 1,
+              emitAdd,
+              name,
+    }
+          },
+          render() {
+            return h('h1', { class: 'foo', onClick: this.emitAdd }, [renderSlots(this.$slots, 'header', { msg: this.msg }), renderSlots(this.$slots, 'footer'), createTextVNode('我是文本'), h('p', {}, [createTextVNode(`provide inject: ${this.name}`)]), h(BarComponent, {}, [])])
+          },
+        }
+
+        const App = {
+          setup() {
+            const onAdd = (val) => {
+              console.log('App onAdd', val)
+            }
+            const onAddFoo = (val) => {
+              console.log('onAddFoo', val)
+            }
+            provide('name', 'hahaha')
+            return {
+              msg: 'hi vue3',
+              onAdd,
+              onAddFoo,
+    }
+          },
+          render() {
+            window.self = this
+            return h('div', { id: 'root' }, [
+              h(FooComponent, { msg: 'My Foo', onAdd: this.onAdd, onAddFoo: this.onAddFoo }, {
+                header: ({ msg }) => h('p', {}, createTextVNode(`foo header${msg}`)),
+                footer: () => h('p', {}, createTextVNode('foo footer')),
+              }),
+              h('h2', {
+                class: 'red',
+                onClick: () => console.log('click h1'),
+              }, createTextVNode(this.msg)),
+              h('p', {
+                class: 'blue',
+                onMouseEnter: () => console.log('p mouse enter'),
+              }, createTextVNode('LaLa')),
+            ])
+          },
+}
+        createApp(App).mount(document.querySelector('#app'))
     </script>
 </body>
 </html>

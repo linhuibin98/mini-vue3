@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Vue</title>
+    <style>
+        .red {
+            color: red;
+        }
+        .blue {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="module">
+        import { createApp, createTextVNode, h, ref } from '../dist/vue.js'
+
+        const array = [
+          h('div', {}, [createTextVNode('A')]),
+          h('div', {}, [createTextVNode('B')]),
+        ]
+
+        const text = createTextVNode('Text')
+
+        const App = {
+          setup() {
+            const count = ref(0)
+            const onAdd = () => {
+              count.value++
+            }
+            const rootProps = ref({
+              foo: 'foo',
+              bar: 'bar',
+            })
+
+            const changeRootProp = (key, value) => {
+              rootProps.value[key] = value
+            }
+            const removeRootProp = () => {
+              rootProps.value = {}
+            }
+
+            const comp = ref(array)
+
+            const toText = () => {
+              comp.value = text
+            }
+            return {
+              count,
+              onAdd,
+              rootProps,
+              changeRootProp,
+              removeRootProp,
+              comp,
+              toText,
+            }
+          },
+          render() {
+            return h('div', { id: 'root', bar: this.rootProps.bar, foo: this.rootProps.foo }, [
+              h('div', {}, [createTextVNode(`count:${this.count}`)]),
+              h('div', { class: 'btns' }, [
+                h('button', { onClick: this.onAdd }, [createTextVNode('Add')]),
+                h('button', { onClick: () => this.changeRootProp('foo', 'f') }, [createTextVNode('changeProps - 值改变')]),
+                h('button', { onClick: () => this.changeRootProp('bar', undefined) }, [createTextVNode('changeProps - 值变成 undefined - 删除')]),
+                h('button', { onClick: () => this.removeRootProp() }, [createTextVNode('changeProps - key 在新的里面没有 - 删除')]),
+              ]),
+              h('section', {}, [
+                h('h2', {}, [createTextVNode('更新 children')]),
+                h('div', {}, this.comp),
+                h('div', {}, [
+                  h('button', { onClick: this.toText }, [createTextVNode('toText')]),
+                ]),
+              ]),
+            ])
+          },
+}
+        createApp(App).mount(document.querySelector('#app'))
+    </script>
+</body>
+</html>
