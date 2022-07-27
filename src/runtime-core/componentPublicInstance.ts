@@ -16,7 +16,7 @@ export const publicInstanceProxyHandlers = {
     else if (hasOwn(props, key))
       return props[key]
 
-    // key -> $el
+    // key -> $el / $slots
     else if (hasOwn(publicPropertiesMap, key))
       return publicPropertiesMap[key](instance)
   },
