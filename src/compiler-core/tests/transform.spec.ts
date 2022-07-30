@@ -3,7 +3,7 @@ import { baseParse } from '../src/parse'
 import { transform } from '../src/transform'
 
 describe('transform', () => {
-  it.only('simple', () => {
+  it('simple', () => {
     const ast = baseParse('<div>Hi,{{message}}</div>')
 
     const transformPlugin = (node) => {
