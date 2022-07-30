@@ -1,5 +1,9 @@
 import { NodeTypes } from './ast'
 
+interface Context {
+  source: string
+}
+
 const enum TagType {
   START,
   END,
@@ -7,42 +11,87 @@ const enum TagType {
 
 export function baseParse(content: string) {
   const context = createParserContext(content)
-  return createRoot(parseChildren(context))
+  return createRoot(parseChildren(context, []))
 }
 
-function parseChildren(context) {
+function parseChildren(context: Context, ancestors: string[]) {
   const nodes: any[] = []
-  const s = context.source
-  let node
-  if (s.startsWith('{{')) {
-    node = parseInterpolation(context)
-  }
-  else if (s[0] === '<') {
-    if (/[a-z]/i.test(s[1]))
-      node = parseElement(context)
-  }
 
-  if (!node)
-    node = parseText(context)
+  while (!isEnd(context, ancestors)) {
+    let node
+    const s = context.source
+    if (s.startsWith('{{')) {
+      node = parseInterpolation(context)
+    }
+    else if (s[0] === '<') {
+      if (/[a-z]/i.test(s[1]))
+        node = parseElement(context, ancestors)
+    }
 
-  nodes.push(node)
+    if (!node)
+      node = parseText(context)
+
+    nodes.push(node)
+  }
 
   return nodes
 }
 
-function parseText(context) {
-  const content = parserTextData(context, context.source.length)
+function isEnd(context: Context, ancestors: string[]) {
+  const s = context.source
+  // 是否是结束标签
+  if (s.startsWith('</')) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      if (startsWidthEndTag(s, ancestors[i]))
+        return true
+    }
+  }
+  return s.length === 0
+}
+
+function parseText(context: Context) {
+  const s = context.source
+  const l = s.length
+  let endIndex = l
+  const endTokens = ['{{', '</']
+
+  for (const t of endTokens) {
+    const index = s.indexOf(t)
+
+    if (index !== -1 && index < endIndex)
+      endIndex = index
+  }
+
+  const content = parserTextData(context, endIndex)
   return {
     type: NodeTypes.TEXT,
     content,
   }
 }
 
-function parseElement(context) {
-  const element = parseTag(context, TagType.START)
+function parseElement(context: Context, ancestors: string[]) {
+  // 处理开始标签
+  const element = parseTag(context, TagType.START)!
+  // 保存标签解析栈
+  ancestors.push(element.tag)
 
-  parseTag(context, TagType.END)
+  // 孩子节点递归
+  element.children = parseChildren(context, ancestors)
+  // 标签处理结束，移出栈
+  ancestors.pop()
+
+  // 处理结束标签
+  if (startsWidthEndTag(context.source, element.tag))
+    parseTag(context, TagType.END)
+
+  else
+    throw new Error(`缺少结束标签：${element.tag}`)
+
   return element
+}
+
+function startsWidthEndTag(source: string, tag: string) {
+  return source.startsWith('</') && tag === source.slice(2, 2 + tag.length)
 }
 
 function parseTag(context, type) {
@@ -59,6 +108,7 @@ function parseTag(context, type) {
   return {
     type: NodeTypes.ELEMENT,
     tag,
+    children: [] as any,
   }
 }
 
@@ -66,7 +116,7 @@ function parseInterpolation(context) {
   const openDelimiter = '{{'
   const closeDelimiter = '}}'
 
-  const closeIndex = context.source.indexOf(closeDelimiter, closeDelimiter.length)
+  const closeIndex = context.source.indexOf(closeDelimiter)
 
   advanceBy(context, openDelimiter.length)
 
@@ -74,7 +124,7 @@ function parseInterpolation(context) {
 
   const content = parserTextData(context, rawContentLength)
 
-  advanceBy(context, rawContentLength + closeDelimiter.length)
+  advanceBy(context, closeDelimiter.length)
 
   return {
     type: NodeTypes.INTERPOLATION,
@@ -91,7 +141,7 @@ function parserTextData(context, length) {
   return content
 }
 
-function advanceBy(context, length) {
+function advanceBy(context: Context, length: number) {
   context.source = context.source.slice(length)
 }
 
