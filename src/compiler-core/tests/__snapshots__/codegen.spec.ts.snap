@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`codegen gen element 1`] = `
+Object {
+  "code": "const { createElementVNode: _createElementVNode} } = Vue
+return function render(_ctx, _cache){return _createElementVNode('div', null, null)}",
+}
+`;
+
+exports[`codegen gen element and text and interpolation 1`] = `
+Object {
+  "code": "const { createElementVNode: _createElementVNode}, toDisplayString: _toDisplayString} } = Vue
+return function render(_ctx, _cache){return _createElementVNode('div', null, 'Hi,' + _toDisplayString(_ctx.message))}",
+}
+`;
+
 exports[`codegen gen interpolation 1`] = `
 Object {
   "code": "const { toDisplayString: _toDisplayString} } = Vue
@@ -9,6 +23,7 @@ return function render(_ctx, _cache){return _toDisplayString(_ctx.message)}",
 
 exports[`codegen gen text 1`] = `
 Object {
-  "code": "return function render(_ctx, _cache){return 'Hi'}",
+  "code": "const { createElementVNode: _createElementVNode} } = Vue
+return function render(_ctx, _cache){return 'Hi'}",
 }
 `;
