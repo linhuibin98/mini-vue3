@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Vue</title>
+    <style>
+        .red {
+            color: red;
+        }
+        .blue {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="module">
+        import { createApp, ref } from '../dist/vue.js'
+
+        const App = {
+          template: '<div>Count: {{count}}</div>',
+          setup() {
+            const count = ref(0)
+            const onAdd = () => {
+              count.value++
+            }
+            return {
+              count,
+              onAdd,
+            }
+          },
+        }
+        createApp(App).mount(document.querySelector('#app'))
+    </script>
+</body>
+</html>

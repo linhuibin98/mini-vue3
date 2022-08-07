@@ -9,7 +9,7 @@ export function generate(ast) {
   // import
   if (ast.helpers.length > 0) {
     const vueBinging = 'Vue'
-    const aliasHelper = v => `${helperMapName[v]}: _${helperMapName[v]}}`
+    const aliasHelper = v => `${helperMapName[v]}: _${helperMapName[v]}`
 
     push(`const { ${ast.helpers.map(aliasHelper).join(', ')} } = ${vueBinging}`)
     push('\n')
