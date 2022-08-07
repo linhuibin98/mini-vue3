@@ -82,10 +82,14 @@ export function createRenderer(options) {
   }
 
   function mountElement(vnode, container, anchor, parentComponent) {
-    const { type, props } = vnode
+    const { type, props, shapeFlag, children } = vnode
     const el = vnode.el = hostCreateElement(type)
     // children
-    mountChildren(vnode.children, el, anchor, parentComponent)
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN)
+      hostSetElementText(el, children)
+
+    else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN)
+      mountChildren(children, el, anchor, parentComponent)
 
     // props
     for (const propName in props)
@@ -378,7 +382,7 @@ export function createRenderer(options) {
       if (!instance.isMounted) { // 第一次 mounted
         const { proxy } = instance
         // component -> children vnode
-        const subTree = instance.render.call(proxy)
+        const subTree = instance.render.call(proxy, proxy)
         instance.subTree = subTree
         // children vnode -> mount
         patch(null, subTree, container, anchor, instance)
@@ -393,7 +397,7 @@ export function createRenderer(options) {
           next.el = preVNode.el
           updateComponentPreRender(instance, next)
         }
-        const subTree = instance.render.call(proxy)
+        const subTree = instance.render.call(proxy, proxy)
         const preSubTree = instance.subTree
         instance.subTree = subTree
         patch(preSubTree, subTree, preSubTree.el, anchor, instance)
